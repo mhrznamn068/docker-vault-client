@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -xe
+# set -xe
 
 vault_token=$vault_token # string
 vault_server=$vault_server #string
@@ -16,8 +16,13 @@ json_to_env=${json_to_env:-False} # boolean
 env_file_name=${env_file_name:-secrets} # string
 
 function get_secrets () {
-    curl -s --header "X-Vault-Token: $vault_token" --request GET \
-    $vault_server_connection://$vault_server/$vault_api_version/$vault_secret_path | jq -r ".data"
+    if [[ ! -z "$vault_token" && ! -z "$vault_server" && ! -z "$vault_server_connection" && ! -z "$vault_api_version" && ! -z "$vault_secret_path" ]]; then
+      curl -s --header "X-Vault-Token: $vault_token" --request GET \
+        $vault_server_connection://$vault_server/$vault_api_version/$vault_secret_path | jq -r ".data"
+    else
+      echo "Vault details not found, recheck and try again !!!" >&2
+      exit 1
+    fi
 }
 
 function json_env () {
